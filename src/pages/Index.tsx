@@ -216,14 +216,14 @@ const Index = () => {
             <Table>
               <TableHeader>
                 <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="w-10 text-zinc-500">#</TableHead>
+                  <TableHead className="w-8 whitespace-nowrap text-white">#</TableHead>
                   <TableHead className="text-zinc-500">Negocio</TableHead>
-                  <TableHead className="text-right text-zinc-500">Rating</TableHead>
-                  <TableHead className="text-right text-zinc-500">Reseñas</TableHead>
-                  <TableHead className="text-zinc-500">Teléfono</TableHead>
-                  <TableHead className="text-zinc-500">Web</TableHead>
-                  <TableHead className="text-zinc-500">Email</TableHead>
-                  <TableHead className="text-zinc-500">Oportunidad</TableHead>
+                  <TableHead className="whitespace-nowrap text-right text-zinc-500">Rating</TableHead>
+                  <TableHead className="whitespace-nowrap text-right text-zinc-500">Reseñas</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-500">Teléfono</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-500">Web</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-500">Email</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-500">Oportunidad</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -239,7 +239,7 @@ const Index = () => {
                       key={`${r.position}-${r.name}`}
                       className="border-white/5 transition-colors hover:bg-white/[0.03]"
                     >
-                      <TableCell className="tabular-nums text-zinc-600">{r.position}</TableCell>
+                      <TableCell className="whitespace-nowrap tabular-nums text-white">{r.position}</TableCell>
                       <TableCell className="font-medium text-zinc-200">{r.name}</TableCell>
                       <TableCell className="text-right tabular-nums text-zinc-300">
                         {r.rating ?? "—"}
@@ -247,7 +247,7 @@ const Index = () => {
                       <TableCell className="text-right tabular-nums text-zinc-400">
                         {r.reviews}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
                         {r.phone ? (
                           <span className="flex items-center gap-1.5 text-zinc-300">
                             {r.phone}
@@ -263,7 +263,7 @@ const Index = () => {
                           <span className="text-zinc-600">—</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
                         {r.website ? (
                           <a
                             href={r.website}
@@ -274,11 +274,11 @@ const Index = () => {
                             Visitar
                           </a>
                         ) : (
-                          <span className="text-zinc-600">Sin web</span>
+                          <span className="font-medium text-[#E0007A]">Sin web</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-zinc-300">
-                        {r.email ?? <span className="text-zinc-600">No encontrado</span>}
+                      <TableCell className="whitespace-nowrap text-zinc-300">
+                        {r.email ?? <span className="text-zinc-600">—</span>}
                       </TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${opportunityConfig[r.opportunity].className}`}>
