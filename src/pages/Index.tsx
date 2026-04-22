@@ -132,7 +132,7 @@ const Index = () => {
           <img
             src={logo}
             alt="Logo SABUESO"
-            className="h-40 w-auto object-contain"
+            className="h-64 w-auto object-contain"
           />
         </div>
       </header>
@@ -216,14 +216,14 @@ const Index = () => {
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-100 hover:bg-transparent">
-                  <TableHead className="w-8 whitespace-nowrap text-zinc-500">#</TableHead>
+                  <TableHead className="w-8 whitespace-nowrap text-zinc-600">#</TableHead>
                   <TableHead className="text-zinc-500">Negocio</TableHead>
-                  <TableHead className="whitespace-nowrap text-right text-zinc-500">Rating</TableHead>
-                  <TableHead className="whitespace-nowrap text-right text-zinc-500">Reseñas</TableHead>
-                  <TableHead className="whitespace-nowrap text-zinc-500">Teléfono</TableHead>
-                  <TableHead className="whitespace-nowrap text-zinc-500">Web</TableHead>
-                  <TableHead className="whitespace-nowrap text-zinc-500">Email</TableHead>
-                  <TableHead className="whitespace-nowrap text-zinc-500">Oportunidad</TableHead>
+                  <TableHead className="whitespace-nowrap text-right text-zinc-500 border-l border-zinc-100">Rating</TableHead>
+                  <TableHead className="whitespace-nowrap text-right text-zinc-500 border-l border-zinc-100">Reseñas</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-500 border-l border-zinc-100">Teléfono</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-500 border-l border-zinc-100">Web</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-500 border-l border-zinc-100">Email</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-500 border-l border-zinc-100">Oportunidad</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -239,7 +239,7 @@ const Index = () => {
                       key={`${r.position}-${r.name}`}
                       className="border-zinc-100 transition-colors hover:bg-zinc-50"
                     >
-                      <TableCell className="whitespace-nowrap tabular-nums text-zinc-400">{r.position}</TableCell>
+                      <TableCell className="whitespace-nowrap tabular-nums text-zinc-600">{r.position}</TableCell>
                       <TableCell className="font-medium text-zinc-800">{r.name}</TableCell>
                       <TableCell className="text-right tabular-nums text-zinc-300">
                         {r.rating ?? "—"}
@@ -247,7 +247,7 @@ const Index = () => {
                       <TableCell className="text-right tabular-nums text-zinc-400">
                         {r.reviews}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">
+                      <TableCell className="whitespace-nowrap border-l border-zinc-100">
                         {r.phone ? (
                           <span className="flex items-center gap-1.5 text-zinc-700">
                             {r.phone}
@@ -263,7 +263,7 @@ const Index = () => {
                           <span className="text-zinc-600">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">
+                      <TableCell className="whitespace-nowrap border-l border-zinc-100">
                         {r.website ? (
                           <a
                             href={r.website}
@@ -277,7 +277,7 @@ const Index = () => {
                           <span className="font-medium text-[#E0007A]">Sin web</span>
                         )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-zinc-700">
+                      <TableCell className="whitespace-nowrap text-zinc-700 border-l border-zinc-100">
                         {r.email ?? <span className="text-zinc-600">—</span>}
                       </TableCell>
                       <TableCell>
