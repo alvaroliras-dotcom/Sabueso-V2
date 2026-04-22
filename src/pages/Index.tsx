@@ -50,15 +50,15 @@ const CATEGORIES = [
 const opportunityConfig: Record<Opportunity, { label: string; className: string }> = {
   Alta: {
     label: "Alta",
-    className: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    className: "bg-[#E0007A]/10 text-[#E0007A] border border-[#E0007A]/30 font-semibold",
   },
   Media: {
     label: "Media",
-    className: "bg-amber-50 text-amber-700 border border-amber-200",
+    className: "bg-amber-50 text-amber-600 border border-amber-300 font-medium",
   },
   Baja: {
     label: "Baja",
-    className: "bg-zinc-100 text-zinc-500 border border-zinc-200",
+    className: "bg-zinc-100 text-zinc-600 border border-zinc-400 font-medium",
   },
 };
 
@@ -128,7 +128,7 @@ const Index = () => {
     <div className="min-h-screen bg-[#f4f4f8] text-zinc-800">
       {/* HERO HEADER */}
       <header className="border-b border-zinc-200 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl flex-col items-center py-3 px-6">
+        <div className="flex w-full flex-col items-center py-3 px-6">
           <img
             src={logo}
             alt="Logo SABUESO"
@@ -216,14 +216,14 @@ const Index = () => {
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-100 hover:bg-transparent">
-                  <TableHead className="w-8 whitespace-nowrap text-zinc-600">#</TableHead>
+                  <TableHead className="w-8 whitespace-nowrap text-zinc-700">#</TableHead>
                   <TableHead className="text-zinc-500">Negocio</TableHead>
-                  <TableHead className="whitespace-nowrap text-right text-zinc-500 border-l border-zinc-100">Rating</TableHead>
-                  <TableHead className="whitespace-nowrap text-right text-zinc-500 border-l border-zinc-100">Reseñas</TableHead>
-                  <TableHead className="whitespace-nowrap text-zinc-500 border-l border-zinc-100">Teléfono</TableHead>
-                  <TableHead className="whitespace-nowrap text-zinc-500 border-l border-zinc-100">Web</TableHead>
-                  <TableHead className="whitespace-nowrap text-zinc-500 border-l border-zinc-100">Email</TableHead>
-                  <TableHead className="whitespace-nowrap text-zinc-500 border-l border-zinc-100">Oportunidad</TableHead>
+                  <TableHead className="whitespace-nowrap text-center text-zinc-700 border-l border-zinc-100">Rating</TableHead>
+                  <TableHead className="whitespace-nowrap text-center text-zinc-700 border-l border-zinc-100">Reseñas</TableHead>
+                  <TableHead className="whitespace-nowrap text-center text-zinc-700 border-l border-zinc-100">Teléfono</TableHead>
+                  <TableHead className="whitespace-nowrap text-center text-zinc-700 border-l border-zinc-100">Web</TableHead>
+                  <TableHead className="whitespace-nowrap text-zinc-700 border-l border-zinc-100">Email</TableHead>
+                  <TableHead className="whitespace-nowrap text-center text-zinc-700 border-l border-zinc-100">Oportunidad</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -239,7 +239,7 @@ const Index = () => {
                       key={`${r.position}-${r.name}`}
                       className="border-zinc-100 transition-colors hover:bg-zinc-50"
                     >
-                      <TableCell className="whitespace-nowrap tabular-nums text-zinc-600">{r.position}</TableCell>
+                      <TableCell className="whitespace-nowrap tabular-nums text-zinc-700">{r.position}</TableCell>
                       <TableCell className="font-medium text-zinc-800">{r.name}</TableCell>
                       <TableCell className="text-right tabular-nums text-zinc-300">
                         {r.rating ?? "—"}
@@ -247,7 +247,7 @@ const Index = () => {
                       <TableCell className="text-right tabular-nums text-zinc-400">
                         {r.reviews}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap border-l border-zinc-100">
+                      <TableCell className="whitespace-nowrap text-center border-l border-zinc-100">
                         {r.phone ? (
                           <span className="flex items-center gap-1.5 text-zinc-700">
                             {r.phone}
@@ -263,7 +263,7 @@ const Index = () => {
                           <span className="text-zinc-600">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap border-l border-zinc-100">
+                      <TableCell className="whitespace-nowrap text-center border-l border-zinc-100">
                         {r.website ? (
                           <a
                             href={r.website}
