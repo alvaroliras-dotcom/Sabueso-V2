@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import logo from "@/assets/sabueso-logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
 type Opportunity = "Alta" | "Media" | "Baja";
 
@@ -91,11 +92,26 @@ const Index = () => {
       return;
     }
     setLoading(true);
-    // Backend pendiente: este botón se conectará a la edge function `search-businesses`.
-    setTimeout(() => {
+    setResults([]);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "search-businesses",
+        { body: { category, location: location.trim() } },
+      );
+      if (error) throw error;
+      const list: BusinessResult[] = data?.results ?? [];
+      setResults(list);
+      if (list.length === 0) {
+        toast.info("Sin resultados para esa búsqueda.");
+      } else {
+        toast.success(`${list.length} negocios encontrados.`);
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Error desconocido";
+      toast.error(`Error en la búsqueda: ${msg}`);
+    } finally {
       setLoading(false);
-      toast.info("Conecta el backend para empezar a recibir resultados reales.");
-    }, 600);
+    }
   };
 
   const handleExport = () => {
