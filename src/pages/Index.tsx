@@ -50,15 +50,15 @@ const CATEGORIES = [
 const opportunityConfig: Record<Opportunity, { label: string; className: string }> = {
   Alta: {
     label: "Alta",
-    className: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
+    className: "bg-emerald-50 text-emerald-700 border border-emerald-200",
   },
   Media: {
     label: "Media",
-    className: "bg-amber-500/15 text-amber-400 border border-amber-500/30",
+    className: "bg-amber-50 text-amber-700 border border-amber-200",
   },
   Baja: {
     label: "Baja",
-    className: "bg-zinc-700/50 text-zinc-400 border border-zinc-600/40",
+    className: "bg-zinc-100 text-zinc-500 border border-zinc-200",
   },
 };
 
@@ -125,34 +125,34 @@ const Index = () => {
   };
 
   return (
-    <div className="dark min-h-screen bg-[#0e0e12] text-zinc-100">
+    <div className="min-h-screen bg-[#f4f4f8] text-zinc-800">
       {/* HERO HEADER */}
-      <header className="border-b border-zinc-300 bg-[#eeeef3]">
-        <div className="mx-auto flex max-w-7xl flex-col items-center py-2 px-6">
+      <header className="border-b border-zinc-200 bg-white shadow-sm">
+        <div className="mx-auto flex max-w-7xl flex-col items-center py-3 px-6">
           <img
             src={logo}
             alt="Logo SABUESO"
-            className="h-[28rem] w-auto object-contain"
+            className="h-40 w-auto object-contain"
           />
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 py-6">
         {/* SEARCH BAR */}
         <section
           aria-label="Búsqueda de negocios"
-          className="rounded-xl border border-white/5 bg-[#1a1a24] p-5 shadow-xl shadow-black/30"
+          className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
         >
           <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_auto_auto]">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-zinc-500">Categoría</label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="border-white/10 bg-[#0e0e12] text-zinc-200 focus:ring-[#E0007A]/40">
+                <SelectTrigger className="border-zinc-300 bg-white text-zinc-800 focus:ring-[#E0007A]/30">
                   <SelectValue placeholder="Selecciona categoría" />
                 </SelectTrigger>
-                <SelectContent className="max-h-72 border-white/10 bg-[#1a1a24] text-zinc-200">
+                <SelectContent className="max-h-72 border-zinc-200 bg-white text-zinc-800">
                   {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c} className="focus:bg-white/5 focus:text-zinc-100">
+                    <SelectItem key={c} value={c} className="focus:bg-zinc-100 focus:text-zinc-900">
                       {c}
                     </SelectItem>
                   ))}
@@ -167,7 +167,7 @@ const Index = () => {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="border-white/10 bg-[#0e0e12] text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-[#E0007A]/40"
+                className="border-zinc-300 bg-white text-zinc-800 placeholder:text-zinc-400 focus-visible:ring-[#E0007A]/30"
               />
             </div>
 
@@ -176,7 +176,7 @@ const Index = () => {
               <Button
                 onClick={handleSearch}
                 disabled={loading}
-                className="min-w-[170px] bg-[#E0007A] text-zinc-100 hover:bg-[#c4006a] disabled:opacity-50"
+                className="min-w-[170px] bg-[#E0007A] text-white hover:bg-[#c4006a] disabled:opacity-50"
               >
                 {loading ? (
                   <><Loader2 className="animate-spin" />Buscando…</>
@@ -192,7 +192,7 @@ const Index = () => {
                 onClick={handleExport}
                 variant="outline"
                 disabled={sortedResults.length === 0}
-                className="border-white/10 bg-transparent text-zinc-400 hover:bg-white/5 hover:text-zinc-200 disabled:opacity-40"
+                className="border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-800 disabled:opacity-40"
               >
                 <Download />Exportar Excel
               </Button>
@@ -203,11 +203,11 @@ const Index = () => {
         {/* RESULTS TABLE */}
         <section
           aria-label="Resultados"
-          className="mt-6 rounded-xl border border-white/5 bg-[#1a1a24] shadow-xl shadow-black/30"
+          className="mt-4 rounded-xl border border-zinc-200 bg-white shadow-sm"
         >
-          <div className="flex items-center justify-between border-b border-white/5 px-5 py-3.5">
-            <h2 className="text-sm font-semibold text-zinc-300">Resultados</h2>
-            <span className="text-xs text-zinc-600">
+          <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
+            <h2 className="text-sm font-semibold text-zinc-700">Resultados</h2>
+            <span className="text-xs text-zinc-400">
               {sortedResults.length} {sortedResults.length === 1 ? "negocio" : "negocios"}
             </span>
           </div>
@@ -215,8 +215,8 @@ const Index = () => {
           <div className="overflow-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead className="w-8 whitespace-nowrap text-white">#</TableHead>
+                <TableRow className="border-zinc-100 hover:bg-transparent">
+                  <TableHead className="w-8 whitespace-nowrap text-zinc-500">#</TableHead>
                   <TableHead className="text-zinc-500">Negocio</TableHead>
                   <TableHead className="whitespace-nowrap text-right text-zinc-500">Rating</TableHead>
                   <TableHead className="whitespace-nowrap text-right text-zinc-500">Reseñas</TableHead>
@@ -228,8 +228,8 @@ const Index = () => {
               </TableHeader>
               <TableBody>
                 {sortedResults.length === 0 ? (
-                  <TableRow className="border-white/5 hover:bg-transparent">
-                    <TableCell colSpan={8} className="h-48 text-center text-sm text-zinc-600">
+                  <TableRow className="border-zinc-100 hover:bg-transparent">
+                    <TableCell colSpan={8} className="h-48 text-center text-sm text-zinc-400">
                       Lanza una búsqueda para ver resultados.
                     </TableCell>
                   </TableRow>
@@ -237,10 +237,10 @@ const Index = () => {
                   sortedResults.map((r) => (
                     <TableRow
                       key={`${r.position}-${r.name}`}
-                      className="border-white/5 transition-colors hover:bg-white/[0.03]"
+                      className="border-zinc-100 transition-colors hover:bg-zinc-50"
                     >
-                      <TableCell className="whitespace-nowrap tabular-nums text-white">{r.position}</TableCell>
-                      <TableCell className="font-medium text-zinc-200">{r.name}</TableCell>
+                      <TableCell className="whitespace-nowrap tabular-nums text-zinc-400">{r.position}</TableCell>
+                      <TableCell className="font-medium text-zinc-800">{r.name}</TableCell>
                       <TableCell className="text-right tabular-nums text-zinc-300">
                         {r.rating ?? "—"}
                       </TableCell>
@@ -249,7 +249,7 @@ const Index = () => {
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {r.phone ? (
-                          <span className="flex items-center gap-1.5 text-zinc-300">
+                          <span className="flex items-center gap-1.5 text-zinc-700">
                             {r.phone}
                             {r.whatsapp && (
                               <MessageCircle
@@ -277,7 +277,7 @@ const Index = () => {
                           <span className="font-medium text-[#E0007A]">Sin web</span>
                         )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-zinc-300">
+                      <TableCell className="whitespace-nowrap text-zinc-700">
                         {r.email ?? <span className="text-zinc-600">—</span>}
                       </TableCell>
                       <TableCell>
