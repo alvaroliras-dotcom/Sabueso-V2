@@ -127,7 +127,7 @@ const Index = () => {
   return (
     <div className="dark min-h-screen bg-[#0e0e12] text-zinc-100">
       {/* HERO HEADER */}
-      <header className="border-b border-zinc-200 bg-white">
+      <header className="border-b border-zinc-300 bg-[#eeeef3]">
         <div className="mx-auto flex max-w-7xl flex-col items-center py-2 px-6">
           <img
             src={logo}
