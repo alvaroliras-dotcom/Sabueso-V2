@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
-import { Search, Download, Loader2 } from "lucide-react";
+import { Search, Download, Loader2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,39 +40,26 @@ interface BusinessResult {
 }
 
 const CATEGORIES = [
-  "Abogado",
-  "Academia",
-  "Asesoría / Gestoría",
-  "Bar / Cafetería",
-  "Carpintería",
-  "Cerrajero",
-  "Clínica dental",
-  "Clínica estética",
-  "Clínica veterinaria",
-  "Electricista",
-  "Fisioterapeuta",
-  "Floristería",
-  "Fontanero",
-  "Gimnasio",
-  "Hotel",
-  "Inmobiliaria",
-  "Joyería",
-  "Mudanzas",
-  "Óptica",
-  "Panadería",
-  "Peluquería",
-  "Pintor",
-  "Psicólogo",
-  "Reformas",
-  "Restaurante",
-  "Taller mecánico",
-  "Tienda de ropa",
+  "Abogado","Academia","Asesoría / Gestoría","Bar / Cafetería","Carpintería",
+  "Cerrajero","Clínica dental","Clínica estética","Clínica veterinaria",
+  "Electricista","Fisioterapeuta","Floristería","Fontanero","Gimnasio","Hotel",
+  "Inmobiliaria","Joyería","Mudanzas","Óptica","Panadería","Peluquería",
+  "Pintor","Psicólogo","Reformas","Restaurante","Taller mecánico","Tienda de ropa",
 ];
 
-const opportunityClasses: Record<Opportunity, string> = {
-  Alta: "bg-[hsl(var(--success))]/15 text-[hsl(var(--success))] border-[hsl(var(--success))]/30",
-  Media: "bg-[hsl(var(--warning))]/15 text-[hsl(var(--warning))] border-[hsl(var(--warning))]/30",
-  Baja: "bg-muted text-muted-foreground border-border",
+const opportunityConfig: Record<Opportunity, { label: string; className: string }> = {
+  Alta: {
+    label: "Alta",
+    className: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
+  },
+  Media: {
+    label: "Media",
+    className: "bg-amber-500/15 text-amber-400 border border-amber-500/30",
+  },
+  Baja: {
+    label: "Baja",
+    className: "bg-zinc-700/50 text-zinc-400 border border-zinc-600/40",
+  },
 };
 
 const Index = () => {
@@ -122,8 +109,6 @@ const Index = () => {
     const rows = sortedResults.map((r) => ({
       Posición: r.position,
       Negocio: r.name,
-      Categoría: r.category,
-      Ciudad: r.city,
       Rating: r.rating ?? "",
       Reseñas: r.reviews,
       Teléfono: r.phone ?? "",
@@ -140,44 +125,40 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-6 py-4">
+    <div className="dark min-h-screen bg-[#0e0e12] text-zinc-100">
+      {/* HERO HEADER */}
+      <header className="border-b border-white/5 bg-[#13131a]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center py-8 px-6">
           <img
             src={logo}
             alt="Logo SABUESO"
-            className="h-10 w-10 rounded-md object-contain"
+            className="mb-3 h-20 w-20 rounded-2xl object-contain shadow-lg shadow-black/40"
           />
-          <div className="flex flex-col leading-tight">
-            <h1 className="text-lg font-semibold tracking-tight text-foreground">
-              SABUESO
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Detector de oportunidades SEO local
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
+            SABUESO
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Detector de oportunidades SEO local
+          </p>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-8">
-        {/* Search bar */}
+        {/* SEARCH BAR */}
         <section
           aria-label="Búsqueda de negocios"
-          className="rounded-lg border border-border bg-card p-4 shadow-sm"
+          className="rounded-xl border border-white/5 bg-[#1a1a24] p-5 shadow-xl shadow-black/30"
         >
           <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_auto_auto]">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                Categoría
-              </label>
+              <label className="text-xs font-medium text-zinc-500">Categoría</label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
+                <SelectTrigger className="border-white/10 bg-[#0e0e12] text-zinc-200 focus:ring-[#E0007A]/40">
                   <SelectValue placeholder="Selecciona categoría" />
                 </SelectTrigger>
-                <SelectContent className="max-h-72">
+                <SelectContent className="max-h-72 border-white/10 bg-[#1a1a24] text-zinc-200">
                   {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c}>
+                    <SelectItem key={c} value={c} className="focus:bg-white/5 focus:text-zinc-100">
                       {c}
                     </SelectItem>
                   ))}
@@ -186,143 +167,128 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                Ciudad o código postal
-              </label>
+              <label className="text-xs font-medium text-zinc-500">Ciudad o código postal</label>
               <Input
                 placeholder="Ej. Valencia, 28013…"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className="border-white/10 bg-[#0e0e12] text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-[#E0007A]/40"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-transparent select-none">
-                .
-              </label>
+              <label className="text-xs font-medium text-transparent select-none">.</label>
               <Button
                 onClick={handleSearch}
                 disabled={loading}
-                className="min-w-[170px]"
+                className="min-w-[170px] bg-[#E0007A] text-zinc-100 hover:bg-[#c4006a] disabled:opacity-50"
               >
                 {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Buscando…
-                  </>
+                  <><Loader2 className="animate-spin" />Buscando…</>
                 ) : (
-                  <>
-                    <Search />
-                    Buscar negocios
-                  </>
+                  <><Search />Buscar negocios</>
                 )}
               </Button>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-transparent select-none">
-                .
-              </label>
+              <label className="text-xs font-medium text-transparent select-none">.</label>
               <Button
                 onClick={handleExport}
                 variant="outline"
                 disabled={sortedResults.length === 0}
+                className="border-white/10 bg-transparent text-zinc-400 hover:bg-white/5 hover:text-zinc-200 disabled:opacity-40"
               >
-                <Download />
-                Exportar Excel
+                <Download />Exportar Excel
               </Button>
             </div>
           </div>
         </section>
 
-        {/* Results table */}
+        {/* RESULTS TABLE */}
         <section
           aria-label="Resultados"
-          className="mt-6 rounded-lg border border-border bg-card shadow-sm"
+          className="mt-6 rounded-xl border border-white/5 bg-[#1a1a24] shadow-xl shadow-black/30"
         >
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h2 className="text-sm font-semibold text-foreground">
-              Resultados
-            </h2>
-            <span className="text-xs text-muted-foreground">
-              {sortedResults.length} negocio
-              {sortedResults.length === 1 ? "" : "s"}
+          <div className="flex items-center justify-between border-b border-white/5 px-5 py-3.5">
+            <h2 className="text-sm font-semibold text-zinc-300">Resultados</h2>
+            <span className="text-xs text-zinc-600">
+              {sortedResults.length} {sortedResults.length === 1 ? "negocio" : "negocios"}
             </span>
           </div>
 
           <div className="overflow-auto">
             <Table>
-              <TableHeader className="sticky top-0 bg-muted/50">
-                <TableRow>
-                  <TableHead className="w-12">#</TableHead>
-                  <TableHead>Negocio</TableHead>
-                  <TableHead>Categoría</TableHead>
-                  <TableHead>Ciudad</TableHead>
-                  <TableHead className="text-right">Rating</TableHead>
-                  <TableHead className="text-right">Reseñas</TableHead>
-                  <TableHead>Teléfono</TableHead>
-                  <TableHead>WhatsApp</TableHead>
-                  <TableHead>Web</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead className="text-right">Score</TableHead>
-                  <TableHead>Oportunidad</TableHead>
+              <TableHeader>
+                <TableRow className="border-white/5 hover:bg-transparent">
+                  <TableHead className="w-10 text-zinc-500">#</TableHead>
+                  <TableHead className="text-zinc-500">Negocio</TableHead>
+                  <TableHead className="text-right text-zinc-500">Rating</TableHead>
+                  <TableHead className="text-right text-zinc-500">Reseñas</TableHead>
+                  <TableHead className="text-zinc-500">Teléfono</TableHead>
+                  <TableHead className="text-zinc-500">Web</TableHead>
+                  <TableHead className="text-zinc-500">Email</TableHead>
+                  <TableHead className="text-zinc-500">Oportunidad</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedResults.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={12}
-                      className="h-40 text-center text-sm text-muted-foreground"
-                    >
-                      Aún no hay resultados. Lanza una búsqueda para empezar.
+                  <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableCell colSpan={8} className="h-48 text-center text-sm text-zinc-600">
+                      Lanza una búsqueda para ver resultados.
                     </TableCell>
                   </TableRow>
                 ) : (
                   sortedResults.map((r) => (
-                    <TableRow key={`${r.position}-${r.name}`}>
-                      <TableCell className="text-muted-foreground">
-                        {r.position}
-                      </TableCell>
-                      <TableCell className="font-medium">{r.name}</TableCell>
-                      <TableCell>{r.category}</TableCell>
-                      <TableCell>{r.city}</TableCell>
-                      <TableCell className="text-right">
+                    <TableRow
+                      key={`${r.position}-${r.name}`}
+                      className="border-white/5 transition-colors hover:bg-white/[0.03]"
+                    >
+                      <TableCell className="tabular-nums text-zinc-600">{r.position}</TableCell>
+                      <TableCell className="font-medium text-zinc-200">{r.name}</TableCell>
+                      <TableCell className="text-right tabular-nums text-zinc-300">
                         {r.rating ?? "—"}
                       </TableCell>
-                      <TableCell className="text-right">{r.reviews}</TableCell>
-                      <TableCell>{r.phone ?? "—"}</TableCell>
-                      <TableCell>{r.whatsapp ? "Sí" : "No"}</TableCell>
+                      <TableCell className="text-right tabular-nums text-zinc-400">
+                        {r.reviews}
+                      </TableCell>
+                      <TableCell>
+                        {r.phone ? (
+                          <span className="flex items-center gap-1.5 text-zinc-300">
+                            {r.phone}
+                            {r.whatsapp && (
+                              <MessageCircle
+                                size={13}
+                                className="shrink-0 text-emerald-500"
+                                aria-label="WhatsApp disponible"
+                              />
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-zinc-600">—</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {r.website ? (
                           <a
                             href={r.website}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-primary underline-offset-2 hover:underline"
+                            className="text-[#E0007A] underline-offset-2 hover:underline"
                           >
                             Visitar
                           </a>
                         ) : (
-                          <span className="text-muted-foreground">Sin web</span>
+                          <span className="text-zinc-600">Sin web</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        {r.email ?? (
-                          <span className="text-muted-foreground">
-                            No encontrado
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-sm">
-                        {r.score.toFixed(1)}
+                      <TableCell className="text-zinc-300">
+                        {r.email ?? <span className="text-zinc-600">No encontrado</span>}
                       </TableCell>
                       <TableCell>
-                        <span
-                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${opportunityClasses[r.opportunity]}`}
-                        >
-                          {r.opportunity}
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${opportunityConfig[r.opportunity].className}`}>
+                          {opportunityConfig[r.opportunity].label}
                         </span>
                       </TableCell>
                     </TableRow>
