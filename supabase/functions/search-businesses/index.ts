@@ -160,7 +160,12 @@ async function textSearch(
   apiKey: string,
   query: string,
   pageToken?: string,
-): Promise<{ results: PlacesTextSearchResult[]; nextPageToken?: string }> {
+): Promise<{
+  results: PlacesTextSearchResult[];
+  nextPageToken?: string;
+  status: string;
+  errorMessage?: string;
+}> {
   const url = new URL(
     "https://maps.googleapis.com/maps/api/place/textsearch/json",
   );
@@ -172,16 +177,29 @@ async function textSearch(
   } else {
     url.searchParams.set("query", query);
   }
-  const res = await fetch(url.toString());
-  const data = await res.json();
-  if (data.status && data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-    throw new Error(
-      `Google Places textsearch failed: ${data.status} ${data.error_message ?? ""}`,
-    );
+  let res: Response;
+  try {
+    res = await fetch(url.toString());
+  } catch (e) {
+    return {
+      results: [],
+      status: "NETWORK_ERROR",
+      errorMessage: e instanceof Error ? e.message : String(e),
+    };
   }
+  if (!res.ok) {
+    return {
+      results: [],
+      status: `HTTP_${res.status}`,
+      errorMessage: await res.text().catch(() => ""),
+    };
+  }
+  const data = await res.json().catch(() => ({}));
   return {
-    results: data.results ?? [],
+    results: Array.isArray(data.results) ? data.results : [],
     nextPageToken: data.next_page_token,
+    status: data.status ?? "UNKNOWN",
+    errorMessage: data.error_message,
   };
 }
 
@@ -189,30 +207,35 @@ async function placeDetails(
   apiKey: string,
   placeId: string,
 ): Promise<PlaceDetails | null> {
-  const url = new URL(
-    "https://maps.googleapis.com/maps/api/place/details/json",
-  );
-  url.searchParams.set("key", apiKey);
-  url.searchParams.set("language", "es");
-  url.searchParams.set("place_id", placeId);
-  url.searchParams.set(
-    "fields",
-    [
-      "name",
-      "formatted_address",
-      "address_components",
-      "formatted_phone_number",
-      "international_phone_number",
-      "website",
-      "rating",
-      "user_ratings_total",
-      "types",
-    ].join(","),
-  );
-  const res = await fetch(url.toString());
-  const data = await res.json();
-  if (data.status !== "OK") return null;
-  return data.result as PlaceDetails;
+  try {
+    const url = new URL(
+      "https://maps.googleapis.com/maps/api/place/details/json",
+    );
+    url.searchParams.set("key", apiKey);
+    url.searchParams.set("language", "es");
+    url.searchParams.set("place_id", placeId);
+    url.searchParams.set(
+      "fields",
+      [
+        "name",
+        "formatted_address",
+        "address_components",
+        "formatted_phone_number",
+        "international_phone_number",
+        "website",
+        "rating",
+        "user_ratings_total",
+        "types",
+      ].join(","),
+    );
+    const res = await fetch(url.toString());
+    if (!res.ok) return null;
+    const data = await res.json().catch(() => ({}));
+    if (data.status !== "OK" || !data.result) return null;
+    return data.result as PlaceDetails;
+  } catch (_e) {
+    return null;
+  }
 }
 
 function extractCity(d: PlaceDetails): string {
@@ -268,7 +291,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    const query = `${category} en ${location}`;
+    // If location is just a postal code (digits), help Google by adding context
+    const isPostalCode = /^\d{4,5}$/.test(location);
+    const query = isPostalCode
+      ? `${category} cerca de ${location} España`
+      : `${category} en ${location}`;
 
     // 1) Collect up to 60 places via paginated text search (3 pages of 20)
     const collected: PlacesTextSearchResult[] = [];
@@ -278,17 +305,53 @@ Deno.serve(async (req) => {
         // Google requires a short delay before nextPageToken is valid
         await new Promise((r) => setTimeout(r, 2100));
       }
-      const { results, nextPageToken } = await textSearch(
+      const { results, nextPageToken, status, errorMessage } = await textSearch(
         apiKey,
         query,
         pageToken,
       );
+
+      // First page: if Google rejects the query, surface a clean error.
+      if (page === 0 && status !== "OK" && status !== "ZERO_RESULTS") {
+        console.error("textsearch first page failed:", status, errorMessage);
+        return new Response(
+          JSON.stringify({
+            error: `No se pudo consultar Google Places (${status}). Prueba con una ciudad en vez de solo el código postal.`,
+            results: [],
+            count: 0,
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      // Subsequent pages: ignore failures (commonly INVALID_REQUEST when
+      // the page token isn't ready yet) and just stop paginating.
+      if (page > 0 && status !== "OK") {
+        if (status !== "ZERO_RESULTS") {
+          console.warn("textsearch pagination stopped:", status, errorMessage);
+        }
+        break;
+      }
+
       collected.push(...results);
       if (!nextPageToken || collected.length >= 50) break;
       pageToken = nextPageToken;
     }
 
     const top = collected.slice(0, 50);
+
+    if (top.length === 0) {
+      return new Response(
+        JSON.stringify({ results: [], count: 0 }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
 
     // 2) Fetch details (phone, website) for ALL — cheap relative to scraping
     const detailed = await Promise.all(
