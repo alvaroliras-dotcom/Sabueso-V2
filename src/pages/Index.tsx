@@ -132,25 +132,25 @@ const Index = () => {
           <img
             src={logo}
             alt="Logo SABUESO"
-            className="h-64 w-auto object-contain"
+            className="h-40 w-auto object-contain sm:h-56 md:h-64"
           />
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-6">
+      <main className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6">
         {/* SEARCH BAR */}
         <section
           aria-label="Búsqueda de negocios"
           className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
         >
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_auto_auto]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-[1fr_1fr_auto_auto]">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-zinc-500">Categoría</label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="border-zinc-300 bg-white text-zinc-800 focus:ring-[#E0007A]/30">
                   <SelectValue placeholder="Selecciona categoría" />
                 </SelectTrigger>
-                <SelectContent className="max-h-72 border-zinc-200 bg-white text-zinc-800">
+                <SelectContent className="max-h-72 border-zinc-200 bg-white text-zinc-800 z-50">
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c} className="focus:bg-zinc-100 focus:text-zinc-900">
                       {c}
@@ -212,7 +212,7 @@ const Index = () => {
             </span>
           </div>
 
-          <div className="overflow-auto">
+          <div className="w-full overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-100 hover:bg-transparent">
