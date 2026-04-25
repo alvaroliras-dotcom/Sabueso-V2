@@ -246,16 +246,8 @@ const BusinessMap = ({ results }: { results: BusinessResult[] }) => {
     }
   }, [loaded, results]);
 
-  if (results.filter(r => r.lat && r.lng).length === 0) return null;
-
-  if (!loaded) return (
-    <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
-        <h2 className="text-sm font-semibold text-zinc-700">Mapa</h2>
-      </div>
-      <div className="flex h-48 items-center justify-center text-sm text-zinc-400">Cargando mapa…</div>
-    </div>
-  );
+  const validResults = results.filter(r => r.lat && r.lng);
+  if (validResults.length === 0) return null;
 
   return (
     <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
