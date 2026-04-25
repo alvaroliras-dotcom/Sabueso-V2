@@ -146,7 +146,7 @@ const BusinessMap = ({ results }: { results: BusinessResult[] }) => {
   useEffect(() => {
     if (window.google?.maps) { setLoaded(true); return; }
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&libraries=marker&v=beta`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&libraries=marker&v=beta&loading=async`;
     script.async = true;
     script.onload = () => setLoaded(true);
     document.head.appendChild(script);
@@ -154,7 +154,7 @@ const BusinessMap = ({ results }: { results: BusinessResult[] }) => {
 
   useEffect(() => {
     if (!loaded || !mapRef.current || results.length === 0) return;
-
+    try {
     const validResults = results.filter(r => r.lat && r.lng);
     if (validResults.length === 0) return;
 
@@ -212,7 +212,7 @@ const BusinessMap = ({ results }: { results: BusinessResult[] }) => {
         title: r.name,
       });
 
-      marker.addListener("click", () => {
+      marker.addListener("gmp-click", () => {
         const content = `
           <div style="font-family:Arial,sans-serif;min-width:200px;padding:4px">
             <div style="font-weight:700;font-size:14px;margin-bottom:6px;color:#111">${r.name}</div>
@@ -241,9 +241,21 @@ const BusinessMap = ({ results }: { results: BusinessResult[] }) => {
       validResults.forEach(r => bounds.extend({ lat: r.lat!, lng: r.lng! }));
       mapInstanceRef.current.fitBounds(bounds, 40);
     }
+    } catch (e) {
+      console.error("Map render error:", e);
+    }
   }, [loaded, results]);
 
   if (results.filter(r => r.lat && r.lng).length === 0) return null;
+
+  if (!loaded) return (
+    <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
+        <h2 className="text-sm font-semibold text-zinc-700">Mapa</h2>
+      </div>
+      <div className="flex h-48 items-center justify-center text-sm text-zinc-400">Cargando mapa…</div>
+    </div>
+  );
 
   return (
     <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
@@ -382,7 +394,7 @@ const Index = () => {
               </div>
             </div>
             <div className="flex gap-3">
-              <Button onClick={handleSearch} disabled={loading} className="flex-1 bg-[#E0007A] text-white hover:bg-[#c4006a] disabled:opacity-50 sm:flex-none sm:min-w-[180px]">
+              <Button type="button" onClick={() => { document.activeElement instanceof HTMLElement && document.activeElement.blur(); handleSearch(); }} disabled={loading} className="flex-1 bg-[#E0007A] text-white hover:bg-[#c4006a] disabled:opacity-50 sm:flex-none sm:min-w-[180px]">
                 {loading ? <><Loader2 className="animate-spin" />Buscando…</> : <><Search />Buscar negocios</>}
               </Button>
               <Button onClick={handleExport} variant="outline" disabled={sortedResults.length === 0} className="flex-1 border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50 disabled:opacity-40 sm:flex-none">
