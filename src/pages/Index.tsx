@@ -22,6 +22,8 @@ interface BusinessResult {
   website: string | null;
   email: string | null;
   city: string;
+  lat?: number;
+  lng?: number;
   score: number;
   opportunity: Opportunity;
 }
@@ -96,6 +98,134 @@ const CategoryInput = ({ value, onChange }: { value: string; onChange: (v: strin
           ))}
         </ul>
       )}
+    </div>
+  );
+};
+
+
+// ── Google Map component ────────────────────────────────────────────────────
+const GMAPS_KEY = "AIzaSyD8ol2QCQgig4DJQfgcxRpjAxMk5NQwKCE";
+
+const BusinessMap = ({ results }: { results: BusinessResult[] }) => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (window.google?.maps) { setLoaded(true); return; }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&libraries=marker&v=beta`;
+    script.async = true;
+    script.onload = () => setLoaded(true);
+    document.head.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded || !mapRef.current || results.length === 0) return;
+
+    const validResults = results.filter(r => r.lat && r.lng);
+    if (validResults.length === 0) return;
+
+    const center = { lat: validResults[0].lat!, lng: validResults[0].lng! };
+
+    if (!mapInstanceRef.current) {
+      mapInstanceRef.current = new google.maps.Map(mapRef.current, {
+        center,
+        zoom: 13,
+        mapId: "sabueso_map",
+        disableDefaultUI: false,
+        zoomControl: true,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: true,
+      });
+    } else {
+      mapInstanceRef.current.setCenter(center);
+    }
+
+    // Clear old markers
+    markersRef.current.forEach(m => { m.map = null; });
+    markersRef.current = [];
+    if (infoWindowRef.current) infoWindowRef.current.close();
+    infoWindowRef.current = new google.maps.InfoWindow();
+
+    const oppColors: Record<string, string> = {
+      Alta: "#E0007A",
+      Media: "#D97706",
+      Baja: "#6B7280",
+    };
+
+    validResults.forEach((r) => {
+      const color = oppColors[r.opportunity] ?? "#6B7280";
+      const pin = document.createElement("div");
+      pin.innerHTML = `
+        <div style="
+          background:${color};
+          color:white;
+          border-radius:50% 50% 50% 0;
+          transform:rotate(-45deg);
+          width:32px;height:32px;
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 2px 6px rgba(0,0,0,0.3);
+          border:2px solid white;
+          cursor:pointer;
+        ">
+          <span style="transform:rotate(45deg);font-size:11px;font-weight:700">${r.position}</span>
+        </div>`;
+
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: r.lat!, lng: r.lng! },
+        map: mapInstanceRef.current!,
+        content: pin,
+        title: r.name,
+      });
+
+      marker.addListener("click", () => {
+        const content = `
+          <div style="font-family:Arial,sans-serif;min-width:200px;padding:4px">
+            <div style="font-weight:700;font-size:14px;margin-bottom:6px;color:#111">${r.name}</div>
+            <div style="font-size:12px;color:#555;margin-bottom:4px">⭐ ${r.rating ?? "—"} · ${r.reviews} reseñas</div>
+            ${r.phone ? `<div style="font-size:12px;color:#555;margin-bottom:4px">📞 ${r.phone}</div>` : ""}
+            ${r.website ? `<div style="font-size:12px;margin-bottom:4px"><a href="${r.website}" target="_blank" style="color:#E0007A;font-weight:600">🌐 Visitar web</a></div>` : '<div style="font-size:12px;color:#E0007A;font-weight:600;margin-bottom:4px">⚠️ Sin web</div>'}
+            ${r.email ? `<div style="font-size:12px;color:#555">✉️ ${r.email}</div>` : ""}
+            <div style="margin-top:8px">
+              <span style="
+                background:${oppColors[r.opportunity]};
+                color:white;padding:2px 10px;
+                border-radius:999px;font-size:11px;font-weight:700
+              ">${r.opportunity}</span>
+            </div>
+          </div>`;
+        infoWindowRef.current!.setContent(content);
+        infoWindowRef.current!.open(mapInstanceRef.current!, marker);
+      });
+
+      markersRef.current.push(marker);
+    });
+
+    // Fit bounds
+    if (validResults.length > 1) {
+      const bounds = new google.maps.LatLngBounds();
+      validResults.forEach(r => bounds.extend({ lat: r.lat!, lng: r.lng! }));
+      mapInstanceRef.current.fitBounds(bounds, 40);
+    }
+  }, [loaded, results]);
+
+  if (results.filter(r => r.lat && r.lng).length === 0) return null;
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
+        <h2 className="text-sm font-semibold text-zinc-700">Mapa</h2>
+        <div className="flex items-center gap-3 text-xs text-zinc-400">
+          <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#E0007A]"></span>Alta</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full bg-amber-500"></span>Media</span>
+          <span className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full bg-zinc-400"></span>Baja</span>
+        </div>
+      </div>
+      <div ref={mapRef} className="h-[420px] w-full" />
     </div>
   );
 };
@@ -231,6 +361,8 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        <BusinessMap results={sortedResults} />
 
         <section aria-label="Resultados" className="mt-4 rounded-xl border border-zinc-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
