@@ -50,53 +50,83 @@ const opportunityConfig: Record<Opportunity, { label: string; className: string 
   Baja: { label: "Baja", className: "bg-zinc-100 text-zinc-600 border border-zinc-400 font-medium" },
 };
 
-// ── Autocomplete component ──────────────────────────────────────────────────
+// ── Category selector component ─────────────────────────────────────────────
 const CategoryInput = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
   const [open, setOpen] = useState(false);
-  const [input, setInput] = useState(value);
+  const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
-  const suggestions = useMemo(() => {
-    if (!input.trim()) return CATEGORIES.slice(0, 8);
-    const q = input.toLowerCase();
-    return CATEGORIES.filter(c => c.toLowerCase().includes(q)).slice(0, 10);
-  }, [input]);
+  const filtered = useMemo(() => {
+    if (!search.trim()) return CATEGORIES;
+    const q = search.toLowerCase();
+    return CATEGORIES.filter(c => c.toLowerCase().includes(q));
+  }, [search]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch("");
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const select = (cat: string) => {
-    setInput(cat);
     onChange(cat);
     setOpen(false);
+    setSearch("");
   };
 
   return (
     <div ref={ref} className="relative">
-      <Input
-        value={input}
-        onChange={e => { setInput(e.target.value); onChange(e.target.value); setOpen(true); }}
-        onFocus={() => setOpen(true)}
-        placeholder="Ej. Clínica dental, Fontanero…"
-        className="border-zinc-300 bg-white text-zinc-800 placeholder:text-zinc-400 focus-visible:ring-[#E0007A]/30"
-      />
-      {open && suggestions.length > 0 && (
-        <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-lg">
-          {suggestions.map(cat => (
-            <li
-              key={cat}
-              onMouseDown={() => select(cat)}
-              className={`cursor-pointer px-4 py-2.5 text-sm text-zinc-800 hover:bg-[#E0007A]/5 hover:text-[#E0007A] ${cat === value ? "bg-[#E0007A]/5 font-medium text-[#E0007A]" : ""}`}
-            >
-              {cat}
-            </li>
-          ))}
-        </ul>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex w-full items-center justify-between rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 hover:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#E0007A]/30"
+      >
+        <span className={value ? "text-zinc-800" : "text-zinc-400"}>
+          {value || "Selecciona o escribe una categoría…"}
+        </span>
+        <svg className={`h-4 w-4 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-zinc-200 bg-white shadow-xl">
+          <div className="p-2 border-b border-zinc-100">
+            <input
+              autoFocus
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar categoría…"
+              className="w-full rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#E0007A]/30"
+            />
+          </div>
+          <ul className="max-h-60 overflow-y-auto py-1">
+            {filtered.length === 0 ? (
+              <li className="px-4 py-3 text-sm text-zinc-400 text-center">Sin resultados. Puedes buscar igualmente.</li>
+            ) : filtered.map(cat => (
+              <li
+                key={cat}
+                onMouseDown={() => select(cat)}
+                className={`cursor-pointer px-4 py-2 text-sm hover:bg-[#E0007A]/5 hover:text-[#E0007A] ${cat === value ? "bg-[#E0007A]/5 font-medium text-[#E0007A]" : "text-zinc-800"}`}
+              >
+                {cat}
+              </li>
+            ))}
+          </ul>
+          {search && (
+            <div className="border-t border-zinc-100 p-2">
+              <button
+                onMouseDown={() => { onChange(search); setOpen(false); setSearch(""); }}
+                className="w-full rounded-md bg-[#E0007A]/5 px-3 py-2 text-sm font-medium text-[#E0007A] hover:bg-[#E0007A]/10"
+              >
+                Buscar "{search}" directamente
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

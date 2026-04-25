@@ -22,6 +22,8 @@ interface BusinessResult {
   website: string | null;
   email: string | null;
   city: string;
+  lat: number | null;
+  lng: number | null;
   score: number;
   opportunity: Opportunity;
 }
@@ -142,6 +144,7 @@ interface PlacesTextSearchResult {
   rating?: number;
   user_ratings_total?: number;
   types?: string[];
+  geometry?: { location: { lat: number; lng: number } };
 }
 
 interface PlaceDetails {
@@ -154,6 +157,7 @@ interface PlaceDetails {
   types?: string[];
   name?: string;
   address_components?: Array<{ long_name: string; types: string[] }>;
+  geometry?: { location: { lat: number; lng: number } };
 }
 
 async function textSearch(
@@ -226,6 +230,7 @@ async function placeDetails(
         "rating",
         "user_ratings_total",
         "types",
+        "geometry",
       ].join(","),
     );
     const res = await fetch(url.toString());
@@ -363,6 +368,8 @@ Deno.serve(async (req) => {
         const rating = d?.rating ?? p.rating ?? null;
         const reviews = d?.user_ratings_total ?? p.user_ratings_total ?? 0;
         const types = d?.types ?? p.types;
+        const lat = d?.geometry?.location?.lat ?? p.geometry?.location?.lat ?? null;
+        const lng = d?.geometry?.location?.lng ?? p.geometry?.location?.lng ?? null;
         return {
           position: idx + 1,
           name: p.name,
@@ -373,6 +380,8 @@ Deno.serve(async (req) => {
           rating,
           reviews,
           category: prettyCategory(types, category),
+          lat,
+          lng,
         };
       }),
     );
@@ -388,7 +397,7 @@ Deno.serve(async (req) => {
         reviews: b.reviews,
         rating: b.rating,
       });
-      return { ...b, whatsapp, prelimScore: score };
+      return { ...b, whatsapp, prelimScore: score, lat: b.lat ?? null, lng: b.lng ?? null };
     });
 
     const sortedForScrape = [...withPrelim].sort(
@@ -425,6 +434,8 @@ Deno.serve(async (req) => {
           email,
           rating: b.rating,
           reviews: b.reviews,
+          lat: b.lat ?? null,
+          lng: b.lng ?? null,
           score,
           opportunity,
         };
