@@ -270,6 +270,7 @@ const Index = () => {
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<BusinessResult[]>([]);
+  const [debugError, setDebugError] = useState<string>("");
 
   const sortedResults = useMemo(
     () => [...results].sort((a, b) => b.score - a.score),
@@ -283,6 +284,7 @@ const Index = () => {
     }
     setLoading(true);
     setResults([]);
+    setDebugError("");
     try {
       const { data, error } = await supabase.functions.invoke("search-businesses", {
         body: { category: category.trim(), location: location.trim() },
@@ -293,7 +295,9 @@ const Index = () => {
       if (list.length === 0) toast.info("Sin resultados para esa búsqueda.");
       else toast.success(`${list.length} negocios encontrados.`);
     } catch (e) {
-      toast.error(`Error: ${e instanceof Error ? e.message : "Error desconocido"}`);
+      const msg = e instanceof Error ? e.message : JSON.stringify(e);
+      setDebugError(msg);
+      toast.error(`Error: ${msg}`);
     } finally {
       setLoading(false);
     }
@@ -396,6 +400,11 @@ const Index = () => {
           </div>
         </section>
 
+        {debugError ? (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <strong>Error:</strong> {debugError}
+          </div>
+        ) : null}
         {window.innerWidth >= 768 && <BusinessMap results={sortedResults} />}
 
         <section aria-label="Resultados" className="mt-4 rounded-xl border border-zinc-200 bg-white shadow-sm">
