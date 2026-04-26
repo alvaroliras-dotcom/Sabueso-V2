@@ -405,7 +405,7 @@ const Index = () => {
             <strong>Error:</strong> {debugError}
           </div>
         ) : null}
-        {window.innerWidth >= 768 && <BusinessMap results={sortedResults} />}
+        <BusinessMap results={sortedResults} />
 
         <section aria-label="Resultados" className="mt-4 rounded-xl border border-zinc-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
