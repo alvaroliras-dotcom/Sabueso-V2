@@ -144,6 +144,101 @@ const CategoryInput = ({ value, onChange }: { value: string; onChange: (v: strin
   );
 };
 
+
+
+const GMAPS_KEY = "AIzaSyD8ol2QCQgig4DJQfgcxRpjAxMk5NQwKCE";
+
+const BusinessMap = ({ results }: { results: BusinessResult[] }) => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (window.google?.maps) {
+      setLoaded(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&libraries=marker&v=beta`;
+    script.async = true;
+    script.onload = () => setLoaded(true);
+    document.head.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded || !mapRef.current) return;
+
+    const valid = results.filter(r => r.lat && r.lng);
+    if (!valid.length) return;
+
+    const center = { lat: valid[0].lat!, lng: valid[0].lng! };
+
+    if (!mapInstanceRef.current) {
+      mapInstanceRef.current = new google.maps.Map(mapRef.current, {
+        center,
+        zoom: 13,
+        mapId: "sabueso_map",
+        disableDefaultUI: false,
+        zoomControl: true,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: true,
+      });
+    }
+
+    markersRef.current.forEach(m => m.map = null);
+    markersRef.current = [];
+
+    const colors = {
+      Alta: "#E0007A",
+      Media: "#D97706",
+      Baja: "#6B7280",
+    };
+
+    valid.forEach(r => {
+      const pin = document.createElement("div");
+      pin.innerHTML = `
+        <div style="
+          background:${colors[r.opportunity]};
+          color:white;
+          border-radius:50%;
+          width:28px;
+          height:28px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:11px;
+          font-weight:700;
+          box-shadow:0 2px 6px rgba(0,0,0,0.25);
+        ">
+          ${r.position}
+        </div>
+      `;
+
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: r.lat!, lng: r.lng! },
+        map: mapInstanceRef.current!,
+        content: pin,
+        title: r.name,
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [loaded, results]);
+
+  if (!results.filter(r => r.lat && r.lng).length) return null;
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
+        <h2 className="text-sm font-semibold text-zinc-700">Mapa</h2>
+      </div>
+      <div ref={mapRef} className="h-[320px] sm:h-[420px] w-full" />
+    </div>
+  );
+};
 const Index = () => {
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
@@ -455,6 +550,8 @@ const Index = () => {
             <div className="text-2xl font-bold text-[#E0007A]">{attackableWebResults.length}</div>
           </div>
         </section>
+
+        <BusinessMap results={sortedResults} />
 
         {mode === "business" ? (
           <section className="mt-4 rounded-xl border border-zinc-200 bg-white shadow-sm">
